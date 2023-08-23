@@ -21,14 +21,14 @@ MAX_PROBES_PER_NEXUS = 16
 
 
 class AriBot(BotAI):
-    async def on_start(self):
-        # Disable map
-        # self.client.map
-        return super().on_start()
+    # async def on_start(self):
+    #     # Disable map
+    #     # self.client.map
+    #     return super().on_start()
 
     async def on_step(self, iteration):
         # Main logic goes here
-        print("Iteration: ", iteration)
+        # print("Iteration: ", iteration)
 
         TO_LOG = [UnitTypeId.PROBE, UnitTypeId.NEXUS, UnitTypeId.PYLON, UnitTypeId.PHOTONCANNON, UnitTypeId.GATEWAY,
                   UnitTypeId.CYBERNETICSCORE, UnitTypeId.STARGATE, UnitTypeId.ASSIMILATOR, UnitTypeId.VOIDRAY, UnitTypeId.SUPPLYDEPOT]
@@ -39,6 +39,12 @@ class AriBot(BotAI):
 
         # print("Probes: ", self.units(UnitTypeId.PROBE).amount, "Nexuses: ", self.townhalls.amount, "Pylons: ", self.structures(UnitTypeId.PYLON).amount, "Cannons: ", self.structures(UnitTypeId.PHOTONCANNON).amount, "Gateways: ", self.structures(UnitTypeId.GATEWAY).amount, "Cores: ", self.structures(
         # UnitTypeId.CYBERNETICSCORE).amount, "Stargates: ", self.structures(UnitTypeId.STARGATE).amount, "Assimilators: ", self.structures(UnitTypeId.ASSIMILATOR).amount, "Void Rays: ", self.units(UnitTypeId.VOIDRAY).amount, "Workers: ", self.workers.amount, "Minerals: ", self.minerals, "Vespene: ", self.vespene)
+
+        if (self.client.game_step > 0 and not self.townhalls.ready):
+            # Attack with all workers if we don't have any nexuses left, attack-move on enemy spawn (doesn't work on 4 player map) so that probes auto attack on the way
+            for worker in self.workers:
+                worker.attack(self.enemy_start_locations[0])
+            return
 
         # TODO: Check if opponent wants to surrender
         # Need to use some sort of heuristic because python-sc2 doesn't support this yet.
@@ -284,7 +290,7 @@ class AriBot(BotAI):
             pass
 
     def on_end(self, game_result: Result):
-        print(StopIteration.value)
+        print("Iterations: ", self.client.game_step)
         return super().on_end(game_result)
 
 
